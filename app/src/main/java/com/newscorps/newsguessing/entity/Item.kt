@@ -7,4 +7,6 @@ data class Item(
     val section: String,
     val standFirst: String,
     val storyUrl: String
-)
+){
+    constructor():this(0, mutableListOf(),"","","","")
+}

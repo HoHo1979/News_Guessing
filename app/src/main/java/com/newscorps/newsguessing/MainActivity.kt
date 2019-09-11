@@ -13,32 +13,25 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.newscorps.newsguessing.entity.Item
 import com.newscorps.newsguessing.entity.ItemViewModel
-import com.newscorps.newsguessing.entity.NewsItems
+import com.newscorps.newsguessing.entity.User
 
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.answer_layout.view.*
 import kotlinx.android.synthetic.main.content_main.*
-import kotlinx.android.synthetic.main.content_main.view.*
-import kotlinx.coroutines.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
-import retrofit2.Call
-import retrofit2.Retrofit
-import retrofit2.await
-import retrofit2.awaitResponse
-import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.http.GET
-import java.net.URL
 
 class MainActivity : AppCompatActivity(), AnkoLogger {
 
     lateinit var itemViewModel:ItemViewModel
     var anwserLists = mutableListOf<String>()
-    var questionIndex=0
     var questionTotalSize=0
-    var totalScore=0;
-    lateinit var questionItem:Item
+    var questionItem=Item()
+    var questionList= mutableListOf<Item>()
     lateinit var adapter:AnswerAdapter
+    var correctAnswerIndex=0
+    //A user just start the game
+    var user=User("James",0,0)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,40 +44,59 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         //The json feed can be update once new information comes in.
         itemViewModel.getNewItems().observe(this, Observer {
 
-            questionItem = it.get(questionIndex)
+            questionList.clear()
+            questionList.addAll(it)
+
+            questionItem = questionList.get(user.currentQuestionIndex)
+
             questionTotalSize = it.size
             //info("Total size of questions:${questionTotalSize}")
 
-            Glide.with(this)
-                .load(questionItem.imageUrl)
-                .apply(RequestOptions().override(120,200))
-                .into(newsImageView)
 
-            anwserLists.clear()
-            anwserLists.addAll(questionItem.headlines)
-            adapter.notifyDataSetChanged()
+            showItemOnView()
 
         })
 
+        skipButton.setOnClickListener {
+
+            user.currentQuestionIndex+=1
+            questionItem = questionList.get(user.currentQuestionIndex)
+            showItemOnView()
+        }
+
+        //Display which question index
+        indexTextView.text=(user.currentQuestionIndex+1).toString()
 
 
-        indexTextView.text=(questionIndex+1).toString()
+        //Recycle view for anwser
+        var anwserRecycler = answerRecycler
+        anwserRecycler.setHasFixedSize(true)
+        anwserRecycler.layoutManager= LinearLayoutManager(this)
+        adapter =  AnswerAdapter(anwserLists,correctAnswerIndex,user)
+        anwserRecycler.adapter = adapter
+
 
         fab.setOnClickListener { view ->
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show()
         }
-
-
-
-        var anwserRecycler = answerRecycler
-        anwserRecycler.setHasFixedSize(true)
-        anwserRecycler.layoutManager= LinearLayoutManager(this)
-        adapter =  AnswerAdapter(anwserLists)
-        anwserRecycler.adapter = adapter
+        
 
     }
 
+    private fun showItemOnView() {
+
+        correctAnswerIndex = questionItem.correctAnswerIndex
+
+        Glide.with(this)
+            .load(questionItem.imageUrl)
+            .apply(RequestOptions().override(120, 200))
+            .into(newsImageView)
+
+        anwserLists.clear()
+        anwserLists.addAll(questionItem.headlines)
+        adapter.notifyDataSetChanged()
+    }
 
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -105,7 +117,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
 }
 
 //RecycleView Adapter to display answers
-class AnswerAdapter(var answerList:List<String>): RecyclerView.Adapter<AnswerAdapter.AnswerHolder>() {
+class AnswerAdapter(var anwserList:List<String>,var correctAnswerIndex:Int,var user:User): RecyclerView.Adapter<AnswerAdapter.AnswerHolder>(),AnkoLogger {
     lateinit var context: Context
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AnswerHolder {
@@ -114,11 +126,25 @@ class AnswerAdapter(var answerList:List<String>): RecyclerView.Adapter<AnswerAda
     }
 
     override fun getItemCount(): Int {
-        return answerList.size
+        return anwserList.size
     }
 
     override fun onBindViewHolder(holder: AnswerHolder, position: Int) {
-        holder.bind(answerList,position)
+        holder.bind(anwserList,position)
+        info("currect Index $correctAnswerIndex")
+        holder.itemView.setOnClickListener{
+
+            //If anwser's poistion is equal to correctAnswerIndex the user is award 2 point,
+            //incorrect answer will get minus 1 point.
+            if(correctAnswerIndex==position){
+                info("Your score +2")
+                user.score+=2
+            }else{
+                info("your score -1")
+                user.score-=1
+            }
+
+        }
     }
 
 
@@ -127,9 +153,8 @@ class AnswerAdapter(var answerList:List<String>): RecyclerView.Adapter<AnswerAda
 
 
         fun bind(answerList: List<String>, position: Int) {
-
-            itemView.answerTextView.text= answerList.get(position)
-
+            info(answerList.size)
+            itemView.answerTextView.text= (position+1).toString()+": "+answerList.get(position)
         }
 
     }
