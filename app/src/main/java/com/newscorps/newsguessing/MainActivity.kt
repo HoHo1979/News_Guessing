@@ -106,7 +106,6 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
     //Load next item on the View.
     fun showItemOnView() {
 
-
         questionItem = questionList.get(QuestionCounter.counter)
 
         indexTextView.text=(QuestionCounter.counter+1).toString()
@@ -123,10 +122,11 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         anwserLists.clear()
         anwserLists.addAll(questionItem.headlines)
         adapter.item=questionItem
-
-        QuestionCounter.counter+=1
+        adapter.correctAnswerIndex=correctAnswerIndex
 
         adapter.notifyDataSetChanged()
+
+        QuestionCounter.counter+=1
     }
 
 
@@ -170,6 +170,9 @@ class AnswerAdapter(var anwserList:List<String>,var correctAnswerIndex:Int,var u
 
             //If anwser's poistion is equal to correctAnswerIndex the user is award 2 point,
             //incorrect answer will get minus 1 point.
+
+            info("correctIndex"+correctAnswerIndex)
+
             if(correctAnswerIndex==position){
                 info("Your score +2")
                 user.score+=2
