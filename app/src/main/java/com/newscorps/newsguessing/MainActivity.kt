@@ -9,6 +9,8 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
 import com.newscorps.newsguessing.entity.Item
 import com.newscorps.newsguessing.entity.ItemViewModel
 import com.newscorps.newsguessing.entity.NewsItems
@@ -33,6 +35,8 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
     lateinit var itemViewModel:ItemViewModel
     var anwserLists = mutableListOf<String>()
     var questionIndex=0
+    var questionTotalSize=0
+    var totalScore=0;
     lateinit var questionItem:Item
     lateinit var adapter:AnswerAdapter
 
@@ -41,7 +45,6 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
-
         itemViewModel = ViewModelProvider.
             AndroidViewModelFactory.getInstance(this.application).create(ItemViewModel::class.java)
 
@@ -49,11 +52,23 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         itemViewModel.getNewItems().observe(this, Observer {
 
             questionItem = it.get(questionIndex)
+            questionTotalSize = it.size
+            //info("Total size of questions:${questionTotalSize}")
+
+            Glide.with(this)
+                .load(questionItem.imageUrl)
+                .apply(RequestOptions().override(120,200))
+                .into(newsImageView)
+
             anwserLists.clear()
             anwserLists.addAll(questionItem.headlines)
             adapter.notifyDataSetChanged()
 
         })
+
+
+
+        indexTextView.text=(questionIndex+1).toString()
 
         fab.setOnClickListener { view ->
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
@@ -89,7 +104,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
     }
 }
 
-
+//RecycleView Adapter to display answers
 class AnswerAdapter(var answerList:List<String>): RecyclerView.Adapter<AnswerAdapter.AnswerHolder>() {
     lateinit var context: Context
 
