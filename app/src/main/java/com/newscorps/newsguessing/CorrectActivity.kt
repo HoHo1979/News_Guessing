@@ -62,7 +62,7 @@ class CorrectActivity : AppCompatActivity(),AnkoLogger {
 
           //  user.currentQuestionIndex+=1
 
-            QuestionCounter.counter+=1
+           // QuestionCounter.counter+=1
             finish()
 
 
