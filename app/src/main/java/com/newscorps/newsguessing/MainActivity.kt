@@ -20,6 +20,7 @@ import com.newscorps.newsguessing.entity.User
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.answer_layout.view.*
 import kotlinx.android.synthetic.main.content_main.*
+import kotlinx.android.synthetic.main.content_main.view.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
@@ -47,6 +48,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
 
 
 
+
         itemViewModel = ViewModelProvider.
             AndroidViewModelFactory.getInstance(this.application).create(ItemViewModel::class.java)
 
@@ -58,9 +60,8 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
 
             questionList.addAll(it)
 
-            user.currentQuestionIndex=0
 
-            questionItem = questionList.get(user.currentQuestionIndex)
+//            questionItem = questionList.get(QuestionCounter.counter)
 
             //questionTotalSize = it.size
             //info("Total size of questions:${questionTotalSize}")
@@ -71,20 +72,19 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
 
         skipButton.setOnClickListener {
 
-            user.currentQuestionIndex+=1
-            questionItem = questionList.get(user.currentQuestionIndex)
+
             showItemOnView()
         }
 
         //Display which question index
-        indexTextView.text=(user.currentQuestionIndex+1).toString()
+        indexTextView.text=(QuestionCounter.counter+1).toString()
 
 
         //Recycle view for anwser
         var anwserRecycler = answerRecycler
         anwserRecycler.setHasFixedSize(true)
         anwserRecycler.layoutManager= LinearLayoutManager(this)
-        adapter =  AnswerAdapter(anwserLists,correctAnswerIndex,user,questionItem)
+        adapter =  AnswerAdapter(anwserLists,correctAnswerIndex,user,questionItem,this)
         anwserRecycler.adapter = adapter
 
 
@@ -104,7 +104,14 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
     }
 
     //Load next item on the View.
-    private fun showItemOnView() {
+    fun showItemOnView() {
+
+
+        questionItem = questionList.get(QuestionCounter.counter)
+
+        indexTextView.text=(QuestionCounter.counter+1).toString()
+
+        scoreTextView.text="Your Score:"+user.score.toString()
 
         correctAnswerIndex = questionItem.correctAnswerIndex
 
@@ -116,6 +123,9 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         anwserLists.clear()
         anwserLists.addAll(questionItem.headlines)
         adapter.item=questionItem
+
+        QuestionCounter.counter+=1
+
         adapter.notifyDataSetChanged()
     }
 
@@ -139,12 +149,13 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
 }
 
 //RecycleView Adapter to display answers
-class AnswerAdapter(var anwserList:List<String>,var correctAnswerIndex:Int,var user:User,var item:Item): RecyclerView.Adapter<AnswerAdapter.AnswerHolder>(),AnkoLogger {
+class AnswerAdapter(var anwserList:List<String>,var correctAnswerIndex:Int,var user:User,var item:Item,var activity: MainActivity): RecyclerView.Adapter<AnswerAdapter.AnswerHolder>(),AnkoLogger {
     lateinit var context: Context
-
+    lateinit var view:View
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AnswerHolder {
         context=parent.context
+        view=parent
         return AnswerHolder(LayoutInflater.from(parent.context).inflate(R.layout.answer_layout,parent,false))
     }
 
@@ -171,6 +182,8 @@ class AnswerAdapter(var anwserList:List<String>,var correctAnswerIndex:Int,var u
             }else{
                 info("your score -1")
                 user.score-=1
+
+                activity.showItemOnView()
 
             }
 
