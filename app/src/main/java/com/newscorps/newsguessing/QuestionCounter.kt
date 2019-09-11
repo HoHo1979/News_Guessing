@@ -1,5 +1,7 @@
 package com.newscorps.newsguessing
 
+import java.util.concurrent.atomic.AtomicInteger
+
 class QuestionCounter {
 
     companion object{

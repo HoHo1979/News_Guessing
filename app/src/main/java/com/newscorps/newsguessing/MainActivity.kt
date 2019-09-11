@@ -2,10 +2,9 @@ package com.newscorps.newsguessing
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.view.*
-import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
@@ -14,15 +13,18 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
-import com.newscorps.newsguessing.entity.CorrectItem
 import com.newscorps.newsguessing.entity.Item
 import com.newscorps.newsguessing.entity.ItemViewModel
 import com.newscorps.newsguessing.entity.User
+import com.newscorps.newsguessing.entity.clearThenAddList
 
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.answer_layout.view.*
 import kotlinx.android.synthetic.main.content_main.*
-import kotlinx.android.synthetic.main.content_main.view.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
@@ -35,7 +37,6 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
 
     lateinit var itemViewModel:ItemViewModel
     var anwserLists = mutableListOf<String>()
-    var questionTotalSize=0
     var questionItem=Item()
     var questionList= mutableListOf<Item>()
     lateinit var adapter:AnswerAdapter
@@ -49,24 +50,16 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         setSupportActionBar(toolbar)
 
 
-
-
         itemViewModel = ViewModelProvider.
             AndroidViewModelFactory.getInstance(this.application).create(ItemViewModel::class.java)
 
         //The json feed can be update once new information comes in.
-        itemViewModel.getNewItems().observe(this, Observer {
+        itemViewModel.getNewsItem().observe(this, Observer {
 
 
             questionList.clear()
 
             questionList.addAll(it)
-
-
-//            questionItem = questionList.get(QuestionCounter.counter)
-
-            //questionTotalSize = it.size
-            //info("Total size of questions:${questionTotalSize}")
 
             showItemOnView()
 
@@ -82,7 +75,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         indexTextView.text=(QuestionCounter.counter+1).toString()
 
 
-        //Recycle view for anwser
+        //Recycle view for anwsers
         var anwserRecycler = answerRecycler
         anwserRecycler.setHasFixedSize(true)
         anwserRecycler.layoutManager= LinearLayoutManager(this)
@@ -108,27 +101,34 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
     //Load next item on the View.
     fun showItemOnView() {
 
+
         questionItem = questionList.get(QuestionCounter.counter)
 
         indexTextView.text=(QuestionCounter.counter+1).toString()
+
+        QuestionCounter.counter += 1
 
         scoreTextView.text="Your Score:"+user.score.toString()
 
         correctAnswerIndex = questionItem.correctAnswerIndex
 
+
         Glide.with(this)
-            .load(questionItem.imageUrl)
-            .apply(RequestOptions().override(120, 200))
-            .into(newsImageView)
+                .load(questionItem.imageUrl)
+                .apply(RequestOptions().override(120, 200))
+                .into(newsImageView)
+
 
         anwserLists.clear()
+
         anwserLists.addAll(questionItem.headlines)
+
         adapter.item=questionItem
         adapter.correctAnswerIndex=correctAnswerIndex
 
         adapter.notifyDataSetChanged()
 
-        QuestionCounter.counter+=1
+
     }
 
 
@@ -170,8 +170,9 @@ class AnswerAdapter(var anwserList:List<String>,var correctAnswerIndex:Int,var u
 
         holder.itemView.setOnClickListener{
 
-            //If anwser's poistion is equal to correctAnswerIndex the user is award 2 point,
+            //If anwser's poistion is equal to correctAnswerIndex the user is award 2 points,
             //incorrect answer will get minus 1 point.
+
 
             info("correctIndex"+correctAnswerIndex)
 
@@ -182,15 +183,17 @@ class AnswerAdapter(var anwserList:List<String>,var correctAnswerIndex:Int,var u
 
                 intent.putExtra(MainActivity.QUESTION_ITEM,item)
                 intent.putExtra(MainActivity.USER,user)
+
                 context.startActivity(intent)
 
             }else{
                 info("your score -1")
                 user.score-=1
-
                 activity.showItemOnView()
 
             }
+
+            holder.itemView.setBackgroundColor(Color.WHITE)
 
         }
     }

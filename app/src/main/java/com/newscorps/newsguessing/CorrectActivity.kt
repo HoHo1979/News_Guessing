@@ -14,6 +14,8 @@ import kotlinx.android.synthetic.main.content_correct.*
 import kotlinx.android.synthetic.main.content_main.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
+import org.jetbrains.anko.intentFor
+import org.jetbrains.anko.startActivity
 
 class CorrectActivity : AppCompatActivity(),AnkoLogger {
 
@@ -60,11 +62,7 @@ class CorrectActivity : AppCompatActivity(),AnkoLogger {
 
         nextButton.setOnClickListener {
 
-          //  user.currentQuestionIndex+=1
-
-           // QuestionCounter.counter+=1
             finish()
-
 
         }
 

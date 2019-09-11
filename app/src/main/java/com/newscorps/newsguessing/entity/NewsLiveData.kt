@@ -49,6 +49,7 @@ class NewsLiveData: LiveData<List<Item>>() {
 
     }
 
+
     private fun getFromRetrofit(): Call<NewsItems> {
 
         var retrofit = Retrofit.Builder()

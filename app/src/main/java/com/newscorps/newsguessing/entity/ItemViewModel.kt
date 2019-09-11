@@ -11,7 +11,7 @@ class ItemViewModel:ViewModel(){
 
     var newsLiveData = NewsLiveData()
 
-    fun getNewItems(): LiveData<List<Item>> {
+    fun getNewsItem(): LiveData<List<Item>> {
 
         return newsLiveData
     }
