@@ -1,6 +1,7 @@
 package com.newscorps.newsguessing
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.view.*
 import com.google.android.material.snackbar.Snackbar
@@ -11,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
+import com.newscorps.newsguessing.entity.CorrectItem
 import com.newscorps.newsguessing.entity.Item
 import com.newscorps.newsguessing.entity.ItemViewModel
 import com.newscorps.newsguessing.entity.User
@@ -22,6 +24,11 @@ import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
 class MainActivity : AppCompatActivity(), AnkoLogger {
+
+    companion object{
+        var QUESTION_ITEM="QUESTION_ITEM"
+        var USER="USER"
+    }
 
     lateinit var itemViewModel:ItemViewModel
     var anwserLists = mutableListOf<String>()
@@ -38,20 +45,25 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
+
+
         itemViewModel = ViewModelProvider.
             AndroidViewModelFactory.getInstance(this.application).create(ItemViewModel::class.java)
 
         //The json feed can be update once new information comes in.
         itemViewModel.getNewItems().observe(this, Observer {
 
+
             questionList.clear()
+
             questionList.addAll(it)
+
+            user.currentQuestionIndex=0
 
             questionItem = questionList.get(user.currentQuestionIndex)
 
-            questionTotalSize = it.size
+            //questionTotalSize = it.size
             //info("Total size of questions:${questionTotalSize}")
-
 
             showItemOnView()
 
@@ -72,7 +84,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         var anwserRecycler = answerRecycler
         anwserRecycler.setHasFixedSize(true)
         anwserRecycler.layoutManager= LinearLayoutManager(this)
-        adapter =  AnswerAdapter(anwserLists,correctAnswerIndex,user)
+        adapter =  AnswerAdapter(anwserLists,correctAnswerIndex,user,questionItem)
         anwserRecycler.adapter = adapter
 
 
@@ -80,10 +92,18 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show()
         }
-        
+
 
     }
 
+
+    override fun onResume() {
+        super.onResume()
+
+
+    }
+
+    //Load next item on the View.
     private fun showItemOnView() {
 
         correctAnswerIndex = questionItem.correctAnswerIndex
@@ -95,8 +115,10 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
 
         anwserLists.clear()
         anwserLists.addAll(questionItem.headlines)
+        adapter.item=questionItem
         adapter.notifyDataSetChanged()
     }
+
 
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -117,8 +139,9 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
 }
 
 //RecycleView Adapter to display answers
-class AnswerAdapter(var anwserList:List<String>,var correctAnswerIndex:Int,var user:User): RecyclerView.Adapter<AnswerAdapter.AnswerHolder>(),AnkoLogger {
+class AnswerAdapter(var anwserList:List<String>,var correctAnswerIndex:Int,var user:User,var item:Item): RecyclerView.Adapter<AnswerAdapter.AnswerHolder>(),AnkoLogger {
     lateinit var context: Context
+
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AnswerHolder {
         context=parent.context
@@ -131,7 +154,7 @@ class AnswerAdapter(var anwserList:List<String>,var correctAnswerIndex:Int,var u
 
     override fun onBindViewHolder(holder: AnswerHolder, position: Int) {
         holder.bind(anwserList,position)
-        info("currect Index $correctAnswerIndex")
+
         holder.itemView.setOnClickListener{
 
             //If anwser's poistion is equal to correctAnswerIndex the user is award 2 point,
@@ -139,9 +162,16 @@ class AnswerAdapter(var anwserList:List<String>,var correctAnswerIndex:Int,var u
             if(correctAnswerIndex==position){
                 info("Your score +2")
                 user.score+=2
+                var intent= Intent(context,CorrectActivity::class.java)
+
+                intent.putExtra(MainActivity.QUESTION_ITEM,item)
+                intent.putExtra(MainActivity.USER,user)
+                context.startActivity(intent)
+
             }else{
                 info("your score -1")
                 user.score-=1
+
             }
 
         }
