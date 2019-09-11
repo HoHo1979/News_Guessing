@@ -5,7 +5,10 @@ import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import com.newscorps.newsguessing.entity.Item
+import com.newscorps.newsguessing.entity.ItemViewModel
 import com.newscorps.newsguessing.entity.NewsItems
 
 import kotlinx.android.synthetic.main.activity_main.*
@@ -22,36 +25,24 @@ import java.net.URL
 
 class MainActivity : AppCompatActivity(), AnkoLogger {
 
-    var url= "https://firebasestorage.googleapis.com/v0/b/nca-dna-apps-dev.appspot.com/o/"
-
-    var items = mutableListOf<Item>()
+    lateinit var itemViewModel:ItemViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
-        CoroutineScope(Dispatchers.Main).launch{
 
-            withContext(Dispatchers.IO){
+        itemViewModel = ViewModelProvider.
+            AndroidViewModelFactory.getInstance(this.application).create(ItemViewModel::class.java)
 
-                var response=getFromRetrofit()
+        itemViewModel.getNewItems().observe(this, Observer {
 
-                var news = response.awaitResponse().body()
-
-                if(news!=null){
-
-                    for(item in news.items){
-
-                       // info("${item.correctAnswerIndex} ${item.imageUrl}")
-                        items.add(item)
-                    }
-                }
-
+            for (item in it) {
+                 info("${item.correctAnswerIndex} ${item.imageUrl}")
             }
 
-        }
-
+        })
 
         fab.setOnClickListener { view ->
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
@@ -59,18 +50,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         }
     }
 
-    private fun getFromRetrofit(): Call<NewsItems> {
 
-        var retrofit = Retrofit.Builder()
-            .baseUrl(url)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-
-        var newService =
-            retrofit.create(NewService::class.java).getAllNewsGame()
-
-        return newService;
-    }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -89,10 +69,3 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
     }
 }
 
-
-interface NewService{
-
-    @GET("game.json?alt=media&token=e36c1a14-25d9-4467-8383-a53f57ba6bfe")
-    fun getAllNewsGame(): Call<NewsItems>
-
-}
