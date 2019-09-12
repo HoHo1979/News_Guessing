@@ -10,9 +10,10 @@ import retrofit2.Retrofit
 import retrofit2.awaitResponse
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
+import kotlin.concurrent.timerTask
 
 //Create a New Live Data Object to seperate the datasource from the data provider,
-// later if datasource is changed the only this file need to be modified.
+// later if datasource is changed, this is the only file need to be modified.
 class NewsLiveData: LiveData<List<Item>>() {
 
     var url= "https://firebasestorage.googleapis.com/v0/b/nca-dna-apps-dev.appspot.com/o/"
@@ -23,12 +24,14 @@ class NewsLiveData: LiveData<List<Item>>() {
 
         CoroutineScope(Dispatchers.Main).launch{
 
-            //Running on other Thread
+            //Running on IO Thread
             withContext(Dispatchers.IO){
 
                 var response=getFromRetrofit()
 
+
                 var news = response.awaitResponse().body()
+
 
                 if(news!=null){
 

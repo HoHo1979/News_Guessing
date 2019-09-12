@@ -24,7 +24,7 @@
         android:id="@+id/button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:backgroundTint="@color/colorAccent"
@@ -36,11 +36,11 @@
 
     <ImageView
         android:id="@+id/newsImageView"
-        android:layout_width="247dp"
+        android:layout_width="0dp"
         android:layout_height="160dp"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="24dp"
         android:layout_marginTop="24dp"
-        android:layout_marginEnd="16dp"
+        android:layout_marginEnd="24dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView"
@@ -69,26 +69,36 @@
         android:orientation="horizontal"
         app:layout_constraintGuide_percent="0.47" />
 
-    <ProgressBar
+
+
+    <com.akexorcist.roundcornerprogressbar.RoundCornerProgressBar
         android:id="@+id/progressBar"
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="409dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
+        android:layout_width="0dp"
+        android:layout_height="20dp"
+        app:rcRadius="2dp"
+        app:rcBackgroundPadding="2dp"
+        app:rcReverse="true"
+        app:rcProgressColor="#1DE9B6"
+        app:rcSecondaryProgressColor="#004D40"
+        app:rcBackgroundColor="#E0F2F1"
+        android:layout_marginStart="24dp"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="16dp"
+        android:layout_marginEnd="24dp"
         app:layout_constraintBottom_toTopOf="@+id/guideline2"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.453"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/scoreTextView"
         app:layout_constraintVertical_bias="0.428" />
 
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/answerRecycler"
-        android:layout_width="279dp"
+        android:layout_width="0dp"
         android:layout_height="0dp"
+        android:layout_marginStart="24dp"
         android:layout_marginTop="8dp"
+        android:layout_marginEnd="24dp"
         android:layout_marginBottom="8dp"
         app:layout_constraintBottom_toTopOf="@+id/skipButton"
         app:layout_constraintEnd_toEndOf="parent"
@@ -98,10 +108,15 @@
 
     <Button
         android:id="@+id/skipButton"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
         android:layout_marginBottom="8dp"
+        android:background="#1DE9B6"
         android:text="Skip! I give up"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:textColor="@android:color/black"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

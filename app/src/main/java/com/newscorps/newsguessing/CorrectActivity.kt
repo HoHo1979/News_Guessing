@@ -12,6 +12,10 @@ import com.newscorps.newsguessing.entity.User
 import kotlinx.android.synthetic.main.activity_correct.*
 import kotlinx.android.synthetic.main.content_correct.*
 import kotlinx.android.synthetic.main.content_main.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.intentFor

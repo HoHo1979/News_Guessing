@@ -16,15 +16,11 @@ import com.bumptech.glide.request.RequestOptions
 import com.newscorps.newsguessing.entity.Item
 import com.newscorps.newsguessing.entity.ItemViewModel
 import com.newscorps.newsguessing.entity.User
-import com.newscorps.newsguessing.entity.clearThenAddList
 
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.answer_layout.view.*
 import kotlinx.android.synthetic.main.content_main.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
@@ -41,6 +37,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
     var questionList= mutableListOf<Item>()
     lateinit var adapter:AnswerAdapter
     var correctAnswerIndex=0
+    var questionSize=0
     //A user just start the game
     var user=User("James",0,0)
 
@@ -53,7 +50,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         itemViewModel = ViewModelProvider.
             AndroidViewModelFactory.getInstance(this.application).create(ItemViewModel::class.java)
 
-        //The json feed can be update once new information comes in.
+        //The json feed can be updated once new information come in.
         itemViewModel.getNewsItem().observe(this, Observer {
 
 
@@ -61,18 +58,26 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
 
             questionList.addAll(it)
 
-            showItemOnView()
+            questionSize=it.size
+
+            showNextItemOnView()
 
         })
 
+
+
         skipButton.setOnClickListener {
 
-
-            showItemOnView()
+            showNextItemOnView()
         }
 
         //Display which question index
         indexTextView.text=(QuestionCounter.counter+1).toString()
+
+        progressBar.apply {
+            max=100.0f
+            isReverse=false
+        }
 
 
         //Recycle view for anwsers
@@ -99,7 +104,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
     }
 
     //Load next item on the View.
-    fun showItemOnView() {
+    fun showNextItemOnView() {
 
 
         questionItem = questionList.get(QuestionCounter.counter)
@@ -107,6 +112,10 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         indexTextView.text=(QuestionCounter.counter+1).toString()
 
         QuestionCounter.counter += 1
+
+        CoroutineScope(Dispatchers.Main).launch {
+            progressBar.progress = QuestionCounter.counter.toFloat()
+        }
 
         scoreTextView.text="Your Score:"+user.score.toString()
 
@@ -150,6 +159,8 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
     }
 }
 
+
+
 //RecycleView Adapter to display answers
 class AnswerAdapter(var anwserList:List<String>,var correctAnswerIndex:Int,var user:User,var item:Item,var activity: MainActivity): RecyclerView.Adapter<AnswerAdapter.AnswerHolder>(),AnkoLogger {
     lateinit var context: Context
@@ -178,22 +189,36 @@ class AnswerAdapter(var anwserList:List<String>,var correctAnswerIndex:Int,var u
 
             if(correctAnswerIndex==position){
                 info("Your score +2")
-                user.score+=2
-                var intent= Intent(context,CorrectActivity::class.java)
 
-                intent.putExtra(MainActivity.QUESTION_ITEM,item)
-                intent.putExtra(MainActivity.USER,user)
+                    user.score+=2
 
-                context.startActivity(intent)
+                    var intent= Intent(context,CorrectActivity::class.java)
+
+                    intent.putExtra(MainActivity.QUESTION_ITEM,item)
+                    intent.putExtra(MainActivity.USER,user)
+
+                    context.startActivity(intent)
+
 
             }else{
                 info("your score -1")
                 user.score-=1
-                activity.showItemOnView()
+
+                it.setBackgroundColor(Color.parseColor("#FF3D00"))
+
+                //Wrong answer will display red box so the user knows that anwser was wrong.
+                GlobalScope.launch (Dispatchers.Main){
+
+                    delay(500)
+
+                    it.setBackgroundColor(Color.WHITE)
+
+                    activity.showNextItemOnView()
+                }
+
+
 
             }
-
-            holder.itemView.setBackgroundColor(Color.WHITE)
 
         }
     }
