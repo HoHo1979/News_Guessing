@@ -1,57 +1,63 @@
 package com.newscorps.newsguessing.entity
 
 import androidx.lifecycle.LiveData
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
+import org.jetbrains.anko.AnkoLogger
 import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.awaitResponse
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
-import kotlin.concurrent.timerTask
 
 //Create a New Live Data Object to seperate the datasource from the data provider,
 // later if datasource is changed, this is the only file need to be modified.
-class NewsLiveData: LiveData<List<Item>>() {
+class NewsLiveData: LiveData<List<Item>>(),AnkoLogger {
 
     var url= "https://firebasestorage.googleapis.com/v0/b/nca-dna-apps-dev.appspot.com/o/"
 
     var items= mutableListOf<Item>()
 
+    lateinit var job:Job
+
+    var isNewsUpdated=true
+
     override fun onActive() {
 
-        CoroutineScope(Dispatchers.Main).launch{
+        if(isNewsUpdated) {
 
-            //Running on IO Thread
-            withContext(Dispatchers.IO){
+            job = CoroutineScope(Dispatchers.Main).launch {
 
-                var response=getFromRetrofit()
+                //Running on IO Thread
+                withContext(Dispatchers.IO) {
 
-
-                var news = response.awaitResponse().body()
-
-
-                if(news!=null){
-
-                    for(item in news.items){
+                    var response = getFromRetrofit()
 
 
-                        items.add(item)
+                    var news = response.awaitResponse().body()
+
+
+                    if (news != null) {
+
+                        items.clearThenAddList(items,news.items)
+
                     }
 
                 }
 
+                //Switch back on main thread and update the value
+                value = items
+                isNewsUpdated=false
             }
-
-            //Switch back on main thread and update the value
+        }else{
             value=items
-
         }
 
     }
 
+    override fun onInactive() {
+        super.onInactive()
+        job.cancel()
+    }
 
     private fun getFromRetrofit(): Call<NewsItems> {
 

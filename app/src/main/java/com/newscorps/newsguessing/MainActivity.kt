@@ -9,6 +9,7 @@ import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -47,8 +48,11 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         setSupportActionBar(toolbar)
 
 
+
         itemViewModel = ViewModelProvider.
             AndroidViewModelFactory.getInstance(this.application).create(ItemViewModel::class.java)
+
+//        itemViewModel = ViewModelProviders.of(this).get(ItemViewModel::class.java)
 
         //The json feed can be updated once new information come in.
         itemViewModel.getNewsItem().observe(this, Observer {
@@ -59,6 +63,10 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
             questionList.addAll(it)
 
             questionSize=it.size
+
+            progressBar.max = questionSize.toFloat()
+
+            info("progressbar"+progressBar.max)
 
             showNextItemOnView()
 
@@ -75,6 +83,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         indexTextView.text=(QuestionCounter.counter+1).toString()
 
         progressBar.apply {
+
             max=100.0f
             isReverse=false
         }
@@ -114,7 +123,8 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         QuestionCounter.counter += 1
 
         CoroutineScope(Dispatchers.Main).launch {
-            progressBar.progress = QuestionCounter.counter.toFloat()
+            progressBar.progress = ((QuestionCounter.counter/questionSize)*1000).toFloat()
+            progressBar
         }
 
         scoreTextView.text="Your Score:"+user.score.toString()
@@ -185,10 +195,7 @@ class AnswerAdapter(var anwserList:List<String>,var correctAnswerIndex:Int,var u
             //incorrect answer will get minus 1 point.
 
 
-            info("correctIndex"+correctAnswerIndex)
-
             if(correctAnswerIndex==position){
-                info("Your score +2")
 
                     user.score+=2
 
@@ -201,12 +208,12 @@ class AnswerAdapter(var anwserList:List<String>,var correctAnswerIndex:Int,var u
 
 
             }else{
-                info("your score -1")
+
                 user.score-=1
 
                 it.setBackgroundColor(Color.parseColor("#FF3D00"))
 
-                //Wrong answer will display red box so the user knows that anwser was wrong.
+                //Wrong answer would display red box so the user knew the answer was incorrect.
                 GlobalScope.launch (Dispatchers.Main){
 
                     delay(500)
@@ -215,8 +222,6 @@ class AnswerAdapter(var anwserList:List<String>,var correctAnswerIndex:Int,var u
 
                     activity.showNextItemOnView()
                 }
-
-
 
             }
 
