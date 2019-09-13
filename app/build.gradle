@@ -52,7 +52,12 @@ dependencies {
     implementation "org.jetbrains.anko:anko-commons:$anko_version"
 
 
+    //Thrid Party Library
     implementation 'com.akexorcist:RoundCornerProgressBar:2.0.3'
+    implementation 'com.mikhaellopez:circularimageview:4.0.2'
+
+
+    implementation 'com.github.siyamed:android-shape-imageview:0.9.+@aar'
 
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.1.1'

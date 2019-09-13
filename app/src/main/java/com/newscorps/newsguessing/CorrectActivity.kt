@@ -32,10 +32,12 @@ class CorrectActivity : AppCompatActivity(),AnkoLogger {
         setContentView(R.layout.activity_correct)
         setSupportActionBar(toolbar)
 
+        supportActionBar?.title="2 points for you!!"
+
         var questionItem=intent.getParcelableExtra<Item>(MainActivity.QUESTION_ITEM)
         var user = intent.getParcelableExtra<User>(MainActivity.USER)
 
-        scoreTV.text="You score: "+user.score.toString()
+        scoreTV.text="That is right,You have\n"+user.score.toString()+"points"
 
         var articleUrl =""
 

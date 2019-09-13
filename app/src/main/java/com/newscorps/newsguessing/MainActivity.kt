@@ -5,6 +5,7 @@ import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.view.*
+import android.widget.Toast
 import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
@@ -17,6 +18,7 @@ import com.bumptech.glide.request.RequestOptions
 import com.newscorps.newsguessing.entity.Item
 import com.newscorps.newsguessing.entity.ItemViewModel
 import com.newscorps.newsguessing.entity.User
+import com.newscorps.newsguessing.entity.clearThenAddList
 
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.answer_layout.view.*
@@ -24,6 +26,9 @@ import kotlinx.android.synthetic.main.content_main.*
 import kotlinx.coroutines.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
+import java.util.*
+import java.util.stream.Collector
+import java.util.stream.Collectors
 
 class MainActivity : AppCompatActivity(), AnkoLogger {
 
@@ -47,26 +52,26 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
-
+        supportActionBar?.title="Welcome ${user.name}"
+        toolbar.subtitle="Guess This HeadLine"
 
         itemViewModel = ViewModelProvider.
             AndroidViewModelFactory.getInstance(this.application).create(ItemViewModel::class.java)
-
-//        itemViewModel = ViewModelProviders.of(this).get(ItemViewModel::class.java)
 
         //The json feed can be updated once new information come in.
         itemViewModel.getNewsItem().observe(this, Observer {
 
 
-            questionList.clear()
 
-            questionList.addAll(it)
+            //Test the progress bar when the questionList only has 10 items: pass
+            //questionList.clearThenAddList(questionList,it.stream().limit(10).collect(Collectors.toList()))
+            //questionSize=10
+
+            questionList.clearThenAddList(questionList,it)
 
             questionSize=it.size
 
             progressBar.max = questionSize.toFloat()
-
-            info("progressbar"+progressBar.max)
 
             showNextItemOnView()
 
@@ -83,8 +88,6 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         indexTextView.text=(QuestionCounter.counter+1).toString()
 
         progressBar.apply {
-
-            max=100.0f
             isReverse=false
         }
 
@@ -115,37 +118,43 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
     //Load next item on the View.
     fun showNextItemOnView() {
 
+        if(QuestionCounter.counter<questionSize) {
 
-        questionItem = questionList.get(QuestionCounter.counter)
+            questionItem = questionList.get(QuestionCounter.counter)
 
-        indexTextView.text=(QuestionCounter.counter+1).toString()
+            indexTextView.text = (QuestionCounter.counter + 1).toString()
 
-        QuestionCounter.counter += 1
+            QuestionCounter.counter += 1
 
-        CoroutineScope(Dispatchers.Main).launch {
-            progressBar.progress = ((QuestionCounter.counter/questionSize)*1000).toFloat()
-            progressBar
-        }
+            CoroutineScope(Dispatchers.Main).launch {
+                progressBar.progress = QuestionCounter.counter.toFloat()
+                progressBar.secondaryProgress = (QuestionCounter.counter + 2).toFloat()
+            }
 
-        scoreTextView.text="Your Score:"+user.score.toString()
+            scoreTextView.text = "Your Score:" + user.score.toString()
 
-        correctAnswerIndex = questionItem.correctAnswerIndex
+            correctAnswerIndex = questionItem.correctAnswerIndex
 
 
-        Glide.with(this)
+            Glide.with(this)
                 .load(questionItem.imageUrl)
-                .apply(RequestOptions().override(120, 200))
+      //          .apply(RequestOptions().override(150, 200))
                 .into(newsImageView)
 
 
-        anwserLists.clear()
+            anwserLists.clearThenAddList(anwserLists,questionItem.headlines)
 
-        anwserLists.addAll(questionItem.headlines)
+            adapter.item = questionItem
 
-        adapter.item=questionItem
-        adapter.correctAnswerIndex=correctAnswerIndex
+            adapter.correctAnswerIndex = correctAnswerIndex
 
-        adapter.notifyDataSetChanged()
+            adapter.notifyDataSetChanged()
+
+        }else{
+
+            Toast.makeText(this,"Go to ScoreBoard",Toast.LENGTH_LONG).show()
+
+        }
 
 
     }
@@ -209,7 +218,10 @@ class AnswerAdapter(var anwserList:List<String>,var correctAnswerIndex:Int,var u
 
             }else{
 
-                user.score-=1
+                //Only deduct point when user has score greater than 0
+                if((user.score-1)>0) {
+                    user.score -= 1
+                }
 
                 it.setBackgroundColor(Color.parseColor("#FF3D00"))
 
