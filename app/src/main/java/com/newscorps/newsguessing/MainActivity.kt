@@ -3,6 +3,8 @@ package com.newscorps.newsguessing
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
+import android.graphics.drawable.Drawable
+import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.view.*
 import android.widget.Toast
@@ -223,14 +225,20 @@ class AnswerAdapter(var anwserList:List<String>,var correctAnswerIndex:Int,var u
                     user.score -= 1
                 }
 
-                it.setBackgroundColor(Color.parseColor("#FF3D00"))
+
+                var gd= it.background as GradientDrawable
+                gd.setColor(Color.parseColor("#FF4081"))
+
+
+//                it.setBackgroundColor(Color.parseColor("#FF4081"))
 
                 //Wrong answer would display red box so the user knew the answer was incorrect.
                 GlobalScope.launch (Dispatchers.Main){
 
                     delay(500)
 
-                    it.setBackgroundColor(Color.WHITE)
+                    gd.setColor(Color.parseColor("#FFFFFF"))
+//                    it.setBackgroundColor(Color.parseColor("#607D8B"))
 
                     activity.showNextItemOnView()
                 }
