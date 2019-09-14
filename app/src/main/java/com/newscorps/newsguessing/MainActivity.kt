@@ -54,6 +54,8 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
+
+
         supportActionBar?.title="Welcome ${user.name}"
         toolbar.subtitle="Guess This HeadLine"
 
@@ -72,8 +74,6 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
             questionList.clearThenAddList(questionList,it)
 
             questionSize=it.size
-
-            progressBar.max = questionSize.toFloat()
 
             showNextItemOnView()
 
@@ -122,9 +122,13 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
 
         if(QuestionCounter.counter<questionSize) {
 
-            questionItem = questionList.get(QuestionCounter.counter)
-
+            //Progress Bard, index and total questions update on the view
+            progressBar.max = questionSize.toFloat()
+            totalQuestiongsTextView.text=questionSize.toString()
             indexTextView.text = (QuestionCounter.counter + 1).toString()
+
+
+            questionItem = questionList.get(QuestionCounter.counter)
 
             QuestionCounter.counter += 1
 
@@ -133,7 +137,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
                 progressBar.secondaryProgress = (QuestionCounter.counter + 2).toFloat()
             }
 
-            scoreTextView.text = "Your Score:" + user.score.toString()
+            scoreTextView.text = user.score.toString()
 
             correctAnswerIndex = questionItem.correctAnswerIndex
 

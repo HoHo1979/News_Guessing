@@ -21,30 +21,32 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:srcCompat="@tools:sample/backgrounds/scenic" />
 
+
     <TextView
         android:id="@+id/scoreTextView"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="107dp"
-        android:layout_marginBottom="10dp"
-        android:text="+8 Point Coming your way"
-        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        android:layout_height="0dp"
+        android:layout_marginEnd="32dp"
+        android:gravity="center"
+        android:text="98"
+        android:textAlignment="center"
+        android:textAppearance="@style/TextAppearance.AppCompat.Display1"
         android:textColor="#ECEFF1"
         android:visibility="visible"
-        app:layout_constraintBottom_toTopOf="@+id/skipButton"
-        app:layout_constraintEnd_toEndOf="@+id/skipButton"
-        app:layout_constraintStart_toStartOf="@+id/skipButton" />
-
+        app:layout_constraintEnd_toStartOf="@+id/skipButton"
+        app:layout_constraintTop_toTopOf="@+id/skipButton" />
 
     <com.akexorcist.roundcornerprogressbar.RoundCornerProgressBar
         android:id="@+id/progressBar"
         android:layout_width="0dp"
         android:layout_height="20dp"
         android:layout_marginStart="32dp"
+        android:layout_marginTop="4dp"
         android:layout_marginEnd="32dp"
-        app:layout_constraintBottom_toTopOf="@+id/scoreTextView"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/answerRecycler"
         app:rcBackgroundColor="#757575"
         app:rcBackgroundPadding="2dp"
         app:rcProgressColor="#FFFFFF"
@@ -57,10 +59,8 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="32dp"
-        android:layout_marginTop="8dp"
         android:layout_marginEnd="32dp"
-        android:layout_marginBottom="8dp"
-        app:layout_constraintBottom_toTopOf="@+id/progressBar"
+        app:layout_constraintBottom_toTopOf="@+id/guideline2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
@@ -70,26 +70,31 @@
         android:id="@+id/skipButton"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
         android:layout_marginEnd="32dp"
         android:layout_marginBottom="16dp"
         android:background="@drawable/my_button"
-        android:text="Skip! I give up"
+        android:gravity="center"
+        android:text="Skip!"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         android:textColor="#FFFFFF"
+        android:textSize="24sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="@+id/guideline4" />
 
     <TextView
         android:id="@+id/indexTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="32dp"
         android:layout_marginTop="8dp"
-        android:text="TextView"
+        android:layout_marginBottom="8dp"
+        android:text="1"
+        android:textColor="@android:color/white"
+        app:layout_constraintBottom_toTopOf="@+id/scoreTextView"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/newsImageView" />
+        app:layout_constraintTop_toTopOf="@+id/totalQuestiongsTextView"
+        app:layout_constraintVertical_bias="1.0" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline"
@@ -97,5 +102,56 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         app:layout_constraintGuide_percent="0.4" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.81" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.55" />
+
+    <TextView
+        android:id="@+id/totalQuestiongsTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="3dp"
+        android:text="540"
+        android:textColor="@android:color/white"
+        app:layout_constraintBottom_toTopOf="@+id/scoreTextView"
+        app:layout_constraintStart_toEndOf="@+id/textView"
+        app:layout_constraintTop_toBottomOf="@+id/progressBar"
+        app:layout_constraintVertical_bias="0.619" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="3dp"
+        android:text="/"
+        android:textColor="@android:color/white"
+        app:layout_constraintBottom_toBottomOf="@+id/indexTextView"
+        app:layout_constraintEnd_toStartOf="@+id/totalQuestiongsTextView"
+        app:layout_constraintStart_toEndOf="@+id/indexTextView"
+        app:layout_constraintTop_toTopOf="@+id/indexTextView" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:text="Score"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        android:textColor="@android:color/white"
+        android:textSize="24sp"
+        app:layout_constraintBottom_toBottomOf="@+id/skipButton"
+        app:layout_constraintEnd_toStartOf="@+id/scoreTextView"
+        app:layout_constraintTop_toTopOf="@+id/skipButton" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
