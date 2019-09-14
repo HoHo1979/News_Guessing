@@ -10,6 +10,7 @@ import android.view.*
 import android.widget.Toast
 import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.view.menu.MenuView
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
@@ -24,6 +25,7 @@ import com.newscorps.newsguessing.entity.clearThenAddList
 
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.answer_layout.view.*
+import kotlinx.android.synthetic.main.content_correct.view.*
 import kotlinx.android.synthetic.main.content_main.*
 import kotlinx.coroutines.*
 import org.jetbrains.anko.AnkoLogger
@@ -230,19 +232,20 @@ class AnswerAdapter(var anwserList:List<String>,var correctAnswerIndex:Int,var u
                 }
 
 
+                //Change the color when the user click
                 var gd= it.background as GradientDrawable
-                gd.setColor(Color.parseColor("#FF4081"))
+                gd.setColor(context.resources.getColor(R.color.accent))
+                it.answerTextView.setTextColor(context.resources.getColor(R.color.icons))
 
-
-//                it.setBackgroundColor(Color.parseColor("#FF4081"))
 
                 //Wrong answer would display red box so the user knew the answer was incorrect.
                 GlobalScope.launch (Dispatchers.Main){
 
                     delay(500)
 
-                    gd.setColor(Color.parseColor("#FFFFFF"))
-//                    it.setBackgroundColor(Color.parseColor("#607D8B"))
+                    //Change back to orignal color
+                    gd.setColor(context.resources.getColor(R.color.primary_light))
+                    it.answerTextView.setTextColor(context.resources.getColor(R.color.primary_text))
 
                     activity.showNextItemOnView()
                 }

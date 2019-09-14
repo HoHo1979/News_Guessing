@@ -5,9 +5,11 @@ import android.os.Bundle
 import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.request.RequestOptions
 import com.newscorps.newsguessing.entity.Item
 import com.newscorps.newsguessing.entity.User
+import jp.wasabeef.glide.transformations.RoundedCornersTransformation
 
 import kotlinx.android.synthetic.main.activity_correct.*
 import kotlinx.android.synthetic.main.content_correct.*
@@ -37,16 +39,21 @@ class CorrectActivity : AppCompatActivity(),AnkoLogger {
         var questionItem=intent.getParcelableExtra<Item>(MainActivity.QUESTION_ITEM)
         var user = intent.getParcelableExtra<User>(MainActivity.USER)
 
-        scoreTV.text="That is right,You have\n"+user.score.toString()+"points"
+        scoreTV.text=user.score.toString()
 
         var articleUrl =""
+
+        //scoreTV.background=R.raw.imgview_star
+
+        itemImageView.setClipToOutline(true)
 
         if (questionItem != null) {
 
 
             Glide.with(this)
                 .load(questionItem.imageUrl)
-                .apply(RequestOptions().override(120, 200))
+                .transform(RoundedCornersTransformation(100,10,RoundedCornersTransformation.CornerType.BOTTOM))
+//                .apply(RequestOptions().override(120, 200))
                 .into(itemImageView)
 
 
