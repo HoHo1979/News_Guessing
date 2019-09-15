@@ -6,14 +6,6 @@ class UserRepository(var currentUser:User) {
 
 
 
-//    lateinit var user: User
-//
-//
-//    fun getUser(): User{
-//
-//        return user
-//    }
-
 
 
 }

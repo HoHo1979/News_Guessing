@@ -51,7 +51,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
 
 
         //Retrieve user data from sqlite and update the score
-        //This can be move to repository and compare withe network information.
+        //This can be move to userRepository and compare withe network information.
         job=CoroutineScope(Dispatchers.IO).launch{
 
            var userDao= UserDatabase.getInstance(application)?.getUserDao()
@@ -156,7 +156,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
             CoroutineScope(Dispatchers.Main).launch {
                 progressBar.progress = QuestionCounter.counter.toFloat()
                 progressBar.secondaryProgress = (QuestionCounter.counter + 2).toFloat()
-            }.cancel()
+            }
 
             scoreTextView.text = currentUser.score.toString()
 
