@@ -2,37 +2,26 @@ package com.newscorps.newsguessing
 
 import android.content.Context
 import android.content.Intent
-import android.graphics.Color
-import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.view.*
 import android.widget.Toast
 import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.view.menu.MenuView
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.bumptech.glide.request.RequestOptions
-import com.newscorps.newsguessing.entity.Item
-import com.newscorps.newsguessing.entity.ItemViewModel
-import com.newscorps.newsguessing.entity.User
-import com.newscorps.newsguessing.entity.clearThenAddList
+import com.newscorps.newsguessing.database.UserDatabase
+import com.newscorps.newsguessing.entity.*
 
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.answer_layout.view.*
-import kotlinx.android.synthetic.main.content_correct.view.*
 import kotlinx.android.synthetic.main.content_main.*
 import kotlinx.coroutines.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
-import java.util.*
-import java.util.stream.Collector
-import java.util.stream.Collectors
 
 class MainActivity : AppCompatActivity(), AnkoLogger {
 
@@ -48,8 +37,12 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
     lateinit var adapter:AnswerAdapter
     var correctAnswerIndex=0
     var questionSize=0
-    //A user just start the game
-    var user=User("James",0,0)
+
+    //A currentUser just start the game
+    var currentUser=User("James",0,0)
+
+    lateinit var job:Job
+    lateinit var job1:Job
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,8 +50,34 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         setSupportActionBar(toolbar)
 
 
+        //Retrieve user data from sqlite and update the score
+        //This can be move to repository and compare withe network information.
+        job=CoroutineScope(Dispatchers.IO).launch{
 
-        supportActionBar?.title="Welcome ${user.name}"
+           var userDao= UserDatabase.getInstance(application)?.getUserDao()
+
+            var users=userDao?.getUser()
+
+            if(users==null || users.size==0){
+                info("Game just started")
+                userDao?.addUser(currentUser)
+            }else {
+                var myuser = userDao?.getUserByName(currentUser.name)
+                withContext(Dispatchers.Main) {
+                    myuser?.let {
+                        QuestionCounter.counter = it.currentQuestionIndex
+                        currentUser.score = it.score
+                        //update the UI with information store on the sqlite
+                        scoreTextView.text=currentUser.score.toString()
+                        indexTextView.text=(QuestionCounter.counter+1).toString()
+                    }
+                }
+            }
+        }
+
+
+        supportActionBar?.title="Welcome ${currentUser.name}"
+
         toolbar.subtitle="Guess This HeadLine"
 
         itemViewModel = ViewModelProvider.
@@ -66,8 +85,6 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
 
         //The json feed can be updated once new information come in.
         itemViewModel.getNewsItem().observe(this, Observer {
-
-
 
             //Test the progress bar when the questionList only has 10 items: pass
             //questionList.clearThenAddList(questionList,it.stream().limit(10).collect(Collectors.toList()))
@@ -100,7 +117,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         var anwserRecycler = answerRecycler
         anwserRecycler.setHasFixedSize(true)
         anwserRecycler.layoutManager= LinearLayoutManager(this)
-        adapter =  AnswerAdapter(anwserLists,correctAnswerIndex,user,questionItem,this)
+        adapter =  AnswerAdapter(anwserLists,correctAnswerIndex,currentUser,questionItem,this)
         anwserRecycler.adapter = adapter
 
 
@@ -132,14 +149,16 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
 
             questionItem = questionList.get(QuestionCounter.counter)
 
+            currentUser.currentQuestionIndex = QuestionCounter.counter
+
             QuestionCounter.counter += 1
 
             CoroutineScope(Dispatchers.Main).launch {
                 progressBar.progress = QuestionCounter.counter.toFloat()
                 progressBar.secondaryProgress = (QuestionCounter.counter + 2).toFloat()
-            }
+            }.cancel()
 
-            scoreTextView.text = user.score.toString()
+            scoreTextView.text = currentUser.score.toString()
 
             correctAnswerIndex = questionItem.correctAnswerIndex
 
@@ -158,6 +177,8 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
 
             adapter.notifyDataSetChanged()
 
+            saveCurrentUserInfoToSqlite()
+
         }else{
 
             Toast.makeText(this,"Go to ScoreBoard",Toast.LENGTH_LONG).show()
@@ -167,6 +188,22 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
 
     }
 
+    private fun saveCurrentUserInfoToSqlite() {
+
+        info("current User ${currentUser.name} ,${currentUser.score}, ${currentUser.currentQuestionIndex}")
+
+
+        job1=CoroutineScope(Dispatchers.IO).launch {
+
+            var userDao= UserDatabase.getInstance(application)?.getUserDao()
+
+            if(userDao!=null){
+                userDao.updateUser(currentUser)
+            }
+
+        }
+
+    }
 
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -183,6 +220,12 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
             R.id.action_settings -> true
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        job.cancel()
+        job1.cancel()
     }
 }
 
@@ -208,7 +251,7 @@ class AnswerAdapter(var anwserList:List<String>,var correctAnswerIndex:Int,var u
 
         holder.itemView.setOnClickListener{
 
-            //If anwser's poistion is equal to correctAnswerIndex the user is award 2 points,
+            //If anwser's poistion is equal to correctAnswerIndex the currentUser is award 2 points,
             //incorrect answer will get minus 1 point.
 
 
@@ -226,19 +269,19 @@ class AnswerAdapter(var anwserList:List<String>,var correctAnswerIndex:Int,var u
 
             }else{
 
-                //Only deduct point when user has score greater than 0
+                //Only deduct point when currentUser has score greater than 0
                 if((user.score-1)>0) {
                     user.score -= 1
                 }
 
 
-                //Change the color when the user click
+                //Change the color when the currentUser click
                 var gd= it.background as GradientDrawable
                 gd.setColor(context.resources.getColor(R.color.accent))
                 it.answerTextView.setTextColor(context.resources.getColor(R.color.icons))
 
 
-                //Wrong answer would display red box so the user knew the answer was incorrect.
+                //Wrong answer would display red box so the currentUser knew the answer was incorrect.
                 GlobalScope.launch (Dispatchers.Main){
 
                     delay(500)

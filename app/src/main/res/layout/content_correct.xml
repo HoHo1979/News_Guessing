@@ -33,6 +33,7 @@
         android:background="@drawable/round_coner_textview"
         android:gravity="center"
         android:paddingLeft="5dp"
+        android:paddingBottom="10dp"
         android:text="TextView"
         android:textAlignment="center"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
@@ -111,21 +112,21 @@
         android:id="@+id/textView3"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="8dp"
         android:gravity="center"
         android:text="score"
         android:textColor="@color/primary_text"
         android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="@+id/scoreTV"
         app:layout_constraintStart_toStartOf="@+id/scoreTV"
-        app:layout_constraintTop_toBottomOf="@+id/standFirstTextView" />
+        app:layout_constraintTop_toBottomOf="@+id/articleButton" />
 
     <TextView
         android:id="@+id/scoreTV"
         android:layout_width="100dp"
         android:layout_height="100dp"
-        android:layout_marginStart="8dp"
         android:layout_marginTop="16dp"
+        android:layout_marginBottom="38dp"
         android:background="@drawable/star"
         android:backgroundTint="#455A64"
         android:backgroundTintMode="src_in"
@@ -135,7 +136,8 @@
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
         android:textColor="@android:color/white"
         android:textSize="36sp"
-        app:layout_constraintEnd_toStartOf="@+id/guideline9"
+        app:layout_constraintBottom_toTopOf="@+id/nextButton"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView3" />
 

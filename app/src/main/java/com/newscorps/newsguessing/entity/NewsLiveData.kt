@@ -66,10 +66,10 @@ class NewsLiveData: LiveData<List<Item>>(),AnkoLogger {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
-        var newService =
+        var newsItems =
             retrofit.create(NewService::class.java).getAllNewsGame()
 
-        return newService;
+        return newsItems;
     }
 }
 

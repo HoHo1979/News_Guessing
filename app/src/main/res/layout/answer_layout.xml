@@ -12,7 +12,7 @@
     <TextView
         android:id="@+id/answerTextView"
         android:layout_width="0dp"
-        android:layout_height="60dp"
+        android:layout_height="wrap_content"
         android:layout_margin="5dp"
         android:paddingTop="2dp"
         android:paddingBottom="2dp"
