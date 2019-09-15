@@ -188,7 +188,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
 
     }
 
-    private fun saveCurrentUserInfoToSqlite() {
+    fun saveCurrentUserInfoToSqlite() {
 
         info("current User ${currentUser.name} ,${currentUser.score}, ${currentUser.currentQuestionIndex}")
 
@@ -257,7 +257,12 @@ class AnswerAdapter(var anwserList:List<String>,var correctAnswerIndex:Int,var u
 
             if(correctAnswerIndex==position){
 
+                    //update user score and user question index and save into database.
                     user.score+=2
+
+                    user.currentQuestionIndex+=1
+
+                    activity.saveCurrentUserInfoToSqlite()
 
                     var intent= Intent(context,CorrectActivity::class.java)
 
