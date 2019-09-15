@@ -270,7 +270,7 @@ class AnswerAdapter(var anwserList:List<String>,var correctAnswerIndex:Int,var u
             }else{
 
                 //Only deduct point when currentUser has score greater than 0
-                if((user.score-1)>0) {
+                if((user.score-1)>=0) {
                     user.score -= 1
                 }
 
